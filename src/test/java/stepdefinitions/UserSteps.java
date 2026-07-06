@@ -1,5 +1,6 @@
 package stepdefinitions;
 
+import api.models.response.UpdateUserResponse;
 import api.models.response.UserResponse;
 import api.services.UserService;
 import assertions.ResponseValidator;
@@ -8,7 +9,9 @@ import api.models.request.UserRequest;
 import api.models.response.CreateUserResponse;
 
 import io.restassured.response.Response;
-
+import org.testng.Assert;
+import config.ConfigReader;
+import static io.restassured.RestAssured.given;
 import static org.testng.Assert.assertEquals;
 
 public class UserSteps {
@@ -19,6 +22,7 @@ public class UserSteps {
 
     private Response response;
     private UserResponse userResponse;
+    private UpdateUserResponse updateUserResponse;
 
     private int userId;
 
@@ -61,13 +65,7 @@ public class UserSteps {
 
         userRequest.setJob(job);
     }
-    @Then("response name should be {string}")
-    public void response_name_should_be(String expectedName) {
 
-        assertEquals(
-                createUserResponse.getName(),
-                expectedName);
-    }
 
     @When("user sends POST request")
     public void user_sends_post_request() {
@@ -87,4 +85,39 @@ public class UserSteps {
 
         ResponseValidator.validateStatusCode(response, statusCode);
     }
+
+    @When("user sends PUT request")
+    public void user_sends_put_request() {
+
+        response = userService.updateUser(userId, userRequest);
+
+        updateUserResponse = response.as(UpdateUserResponse.class);
+    }
+
+    @Then("response name should be {string}")
+    public void response_name_should_be(String expectedName) {
+
+        String actualName = response.jsonPath().getString("name");
+
+        Assert.assertEquals(actualName, expectedName);
+    }
+
+    @Then("response job should be {string}")
+    public void response_job_should_be(String expectedJob) {
+
+        String actualJob = response.jsonPath().getString("job");
+
+        Assert.assertEquals(actualJob, expectedJob);
+    }
+
+    @When("user sends DELETE request")
+    public void user_sends_delete_request() {
+
+        response = userService.deleteUser(userId);
+    }
+
+    
+
+
+
 }
