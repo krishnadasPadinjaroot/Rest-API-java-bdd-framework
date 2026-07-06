@@ -20,12 +20,19 @@ pipeline {
             }
         }
 
+        stage('Verify Allure Results') {
+            steps {
+                bat 'dir target'
+                bat 'dir target\\allure-results'
+            }
+        }
+
         stage('Publish Allure Report') {
             steps {
                 allure(
                     includeProperties: false,
                     jdk: '',
-                    results: [[path: 'allure-results']]
+                    results: [[path: 'target/allure-results']]
                 )
             }
         }
@@ -33,7 +40,7 @@ pipeline {
 
     post {
         always {
-            junit '**/surefire-reports/*.xml'
+            junit 'target/surefire-reports/*.xml'
             archiveArtifacts artifacts: 'target/**/*', fingerprint: true
         }
 
